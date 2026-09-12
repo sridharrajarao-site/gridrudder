@@ -1,0 +1,66 @@
+name: Bug report
+description: Report a reproducible problem in simulation, read-only observation, audit, or documentation.
+title: "[Bug]: "
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not report vulnerabilities, credentials, private infrastructure identifiers, or customer data here. Use the private security route instead. Public issues do not authorize hardware testing.
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Affected surface
+      options:
+        - Simulator or benchmark
+        - Read-only NVIDIA probe
+        - Audit or verification
+        - Attended performance-trial contract
+        - Website or documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Observed behavior
+      description: What happened? Redact hostnames, IP addresses, GPU UUIDs, paths, names, and workload/customer details.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal safe reproduction
+      description: Prefer simulator or synthetic input. Do not include a hardware-write command.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: GridRudder version or commit
+      placeholder: v0.1.0 or commit SHA
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      placeholder: Python 3.12, Ubuntu 24.04 (no hostname)
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I removed secrets and identifying infrastructure/customer data.
+          required: true
+        - label: This report does not describe unauthorized or production hardware actuation.
+          required: true

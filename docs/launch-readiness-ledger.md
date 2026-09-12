@@ -24,7 +24,7 @@ GridRudder has a credible simulator-first safety core, a single-host physical me
 | Release open components under Apache-2.0 | `LICENSE`, `NOTICE`, open-core boundary, contribution/security/conduct docs, safe quickstart | **Locally done** | Legal/provenance review remains. The source is not open source to users until it is actually distributed. |
 | Publish a sanitized repository | `.gitignore`, `.gitattributes`, and `tools/build_public_release.py` exclude private evidence, nested Git state, dependencies, build output, deployment metadata, and caches | **Locally packaged** | Review generated manifest/archive, then create an external repository only with separate authorization. Do not import unscanned nested history. |
 | Consistent public name and domain | ADR-0003 accepts GridRudder; README and active launch docs use it; site canonical uses `https://gridrudder.com` | **Partial** | Verify registration, DNS, TLS, production routing, and formal trademark clearance externally. Historical naming ADRs remain intentionally unchanged. |
-| Accurate automated-test claim | Current local Python suite passes 203 tests; the site distinguishes the physical-trial build from later code but its later-suite count is already stale | **Gap in site copy** | Preserve the historical count only if its test output is retained; generate current counts during release or avoid hard-coded current counts. Test count is software verification, not hardware evidence. |
+| Accurate automated-test claim | Current local Python suite passes 209 tests; the site distinguishes the physical-trial build from later code but its later-suite count is already stale | **Gap in site copy** | Preserve the historical count only if its test output is retained; generate current counts during release or avoid hard-coded current counts. Test count is software verification, not hardware evidence. |
 | Website release verification | Production site build completes, but `site/tests/rendered-html.test.mjs` still asserts the removed starter skeleton and references deleted preview files | **Failing** | Replace starter-template tests with assertions for GridRudder content, privacy, evidence qualifiers, form behavior, metadata, accessibility, and failure states; require them in CI. |
 | Installable open-source product | Repository runs from source with Python 3.9+ and no core third-party packages | **Partial** | Add packaging metadata, versioning, reproducible installation, upgrade/removal docs, release signing, and CI. There is no supported daemon/service package yet. |
 
@@ -41,7 +41,7 @@ GridRudder has a credible simulator-first safety core, a single-host physical me
 
 ## Delivered artifacts
 
-- Deterministic simulator, policy/safety logic, replay, audit verification, fault matrices, release evidence, and 203 passing Python tests as of this ledger date.
+- Deterministic simulator, policy/safety logic, replay, audit verification, fault matrices, release evidence, and 209 passing Python tests as of this ledger date.
 - Read-only NVIDIA probe and disabled legacy hardware-trial CLI.
 - Library-level attended performance boundary with scoped authorization and restoration safeguards.
 - One private physical audit artifact proving a bounded change and independent host-watt response on one trial.

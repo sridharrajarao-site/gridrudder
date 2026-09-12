@@ -6,6 +6,24 @@ Purpose: Prevent simulator confidence from being mistaken for authorization to c
 
 No unchecked item is implicitly waived. A waiver requires an ADR stating the risk owner, rationale, compensating control, expiration, and rollback. Any stop condition overrides a prior go decision.
 
+## Gate 0 — Read-only rental qualification
+
+This gate permits telemetry collection only. It does not permit a GPU power-limit
+or persistence-mode write.
+
+- [ ] Rental owner confirms the machine is dedicated bare metal and identifies the authorized host.
+- [ ] Expected DMI host identity, BMC FRU chassis serial, GPU UUID, BMC meter ID, and physical measurement boundary are recorded out of band.
+- [ ] NTP/chrony reports synchronized time; maximum accepted skew and ingest latency are approved.
+- [ ] Absolute `nvidia-smi` and `ipmitool` paths are regular, root-owned, executable, not group/world writable, and their SHA-256 digests are recorded.
+- [ ] Collector service identity has read-only BMC access and no facility-equipment credentials.
+- [ ] At least three NVIDIA and BMC observations pass freshness, quality, ordering, host/meter binding, and alignment validation.
+- [ ] Raw command outputs and the qualification packet are retained without credentials or customer workload data.
+- [ ] The deployed qualification artifact contains no reachable GPU write command.
+
+Decision: **GO / NO-GO for read-only qualification only**  
+Architect: ____________________ Date: __________  
+Rental owner: _________________ Date: __________
+
 ## Gate 1 — Hardware-in-the-loop readiness
 
 Required before connecting an actuator adapter to physical GPU hardware:
@@ -128,4 +146,3 @@ Attach to each decision:
 - [ ] Threat model, security findings, exceptions, and remediation status.
 - [ ] Failure-injection, emergency-stop, restore, and rollback evidence.
 - [ ] Runbooks, contact tree, training/tabletop record, and signed approvals.
-

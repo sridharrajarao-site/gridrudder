@@ -14,7 +14,7 @@ Read [`docs/quickstart.md`](docs/quickstart.md) and begin with the simulator. Ha
 4. Explain any new privilege, network access, telemetry, write action, dependency, or persistent state in the change description.
 5. Update public interfaces, audit fields, compatibility limits, and operator instructions when behavior changes.
 
-Contributors must have the right to submit their work. By contributing, you agree that your contribution is licensed under Apache-2.0. Before public contribution intake opens, maintainers intend to enable Developer Certificate of Origin sign-off and document the exact check.
+Contributors must have the right to submit their work. By contributing, you agree that your contribution is licensed under Apache-2.0 and certify it under the [Developer Certificate of Origin 1.1](https://developercertificate.org/). Add a sign-off to every commit with `git commit --signoff`; this appends `Signed-off-by: Name <email>` using your Git identity. The repository’s DCO check requires an author-matching sign-off on each pull-request commit. A sign-off is a contribution certification, not a GPG/SSH signature.
 
 ## Safety invariants
 
@@ -30,3 +30,7 @@ Contributors must have the right to submit their work. By contributing, you agre
 Maintainers may require an architecture and safety review before merging control, policy, audit, or adapter changes. Compatibility claims must identify the exact GPU, driver, operating system, server/BMC, meter source, workload, and test method. A result from one host does not generalize to a fleet.
 
 Be respectful and follow [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
+
+Release compatibility and support expectations are documented in
+[`docs/versioning-and-releases.md`](docs/versioning-and-releases.md),
+[`docs/compatibility.md`](docs/compatibility.md), and [`SUPPORT.md`](SUPPORT.md).

@@ -31,10 +31,10 @@ This checklist separates repository publication from claims of hardware or produ
 ## Community and interfaces
 
 - [x] Contribution and conduct expectations are documented.
-- [ ] Enable and document Developer Certificate of Origin sign-off checks.
-- [ ] Add issue and pull-request templates that route security issues privately.
+- [x] Document Developer Certificate of Origin sign-off and add a tested per-commit CI check.
+- [x] Add issue and pull-request templates that route security issues privately.
 - [ ] Version public audit, intake, and compatibility schemas and define compatibility policy.
-- [ ] Publish maintained hardware support and known-limitations matrices.
+- [x] Publish a compatibility and known-limitations matrix that distinguishes observations from support.
 
 ## Pilot readiness
 

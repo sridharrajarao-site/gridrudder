@@ -1,0 +1,39 @@
+name: Feature request
+description: Propose a bounded improvement with explicit safety and data implications.
+title: "[Feature]: "
+labels: [enhancement, triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Operator problem
+      description: Describe the job or failure mode, not only a preferred implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome and acceptance evidence
+    validations:
+      required: true
+  - type: dropdown
+    id: privilege
+    attributes:
+      label: Does this change privileges, network access, telemetry, persistent data, or hardware writes?
+      options: ["No", "Yes", "Unsure"]
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: Safety, security, and privacy impact
+      description: State new failure modes, affected trust boundaries, and a safe rollback.
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope acknowledgement
+      options:
+        - label: This request does not assume production readiness or facility-equipment control.
+          required: true

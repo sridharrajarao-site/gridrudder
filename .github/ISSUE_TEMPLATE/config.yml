@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: mailto:pilot@gridrudder.com?subject=%5BSECURITY%5D%20GridRudder%20report
+    about: Report vulnerabilities privately; do not put credentials or sensitive evidence in the first message.
+  - name: Design-partner qualification
+    url: mailto:pilot@gridrudder.com?subject=GridRudder%20host%20qualification
+    about: Ask whether a non-production GPU host fits the supervised evaluation.

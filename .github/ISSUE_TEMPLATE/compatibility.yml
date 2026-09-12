@@ -1,0 +1,52 @@
+name: Compatibility observation
+description: Share sanitized, read-only hardware compatibility facts—not a support claim.
+title: "[Compatibility]: "
+labels: [compatibility, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use read-only discovery. Do not post GPU UUIDs, serial numbers, hostnames, IPs, credentials, raw customer traces, or hardware-write commands. An observation is not a production-support claim.
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU model and count
+      placeholder: 2 × NVIDIA L40S
+    validations:
+      required: true
+  - type: input
+    id: driver
+    attributes:
+      label: Driver and operating system
+      placeholder: NVIDIA 550.x, Ubuntu 24.04
+    validations:
+      required: true
+  - type: input
+    id: server
+    attributes:
+      label: Server and BMC family
+      description: Model family only; omit asset tags and identifiers.
+    validations:
+      required: true
+  - type: dropdown
+    id: meter
+    attributes:
+      label: Independent meter source
+      options: [IPMI DCMI, Redfish, Metered PDU, None, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: observation
+    attributes:
+      label: Sanitized read-only observation
+    validations:
+      required: true
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Publication checks
+      options:
+        - label: I am authorized to share these non-identifying facts.
+          required: true
+        - label: I removed credentials and unique infrastructure/customer identifiers.
+          required: true
