@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function Privacy() {
   return <main className="legal">
-    <Link className="brand" href="/"><span>GR</span> GRIDRUDDER</Link>
+    <Link className="brand" href="/"><img className="brand-mark" src="/steered-grid.png" width="56" height="28" alt="" aria-hidden="true"/> <span>GridRudder</span></Link>
     <p className="legal-label">PRIVACY / PILOT INTAKE</p>
     <h1>Plain-language privacy.</h1>
     <p className="legal-lede">This notice applies to information submitted through the GridRudder design-partner intake form.</p>

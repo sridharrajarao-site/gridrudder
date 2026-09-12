@@ -1,17 +1,54 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { handlePilotOperations } from "../app/ops/pilot-policy.mjs";
+function operations(path, options = {}, bindings = {}) {
+  const request = new Request(`https://gridrudder.com${path}`, options);
+  const id = request.headers.get("oai-authenticated-user-id");
+  return handlePilotOperations(request, id ? { userId: id } : null, bindings.PILOT_OPERATOR_USER_ID, bindings.DB);
+}
 
-async function render(path = "/") {
+async function render(path = "/", options = {}, bindings = {}) {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}-${path}`);
   const { default: worker } = await import(workerUrl.href);
 
   return worker.fetch(
-    new Request(`https://gridrudder.com${path}`, { headers: { accept: "text/html" } }),
-    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
+    new Request(`https://gridrudder.com${path}`, { headers: { accept: "text/html" }, ...options }),
+    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) }, ...bindings },
     { waitUntil() {}, passThroughOnException() {} },
   );
 }
+
+test("pilot operations fail closed without configured exact operator identity", async () => {
+  const headers = { "oai-authenticated-user-id": "test-viewer", "oai-authenticated-user-email": "%@example.invalid" };
+  for (const bindings of [{}, { PILOT_OPERATOR_USER_ID: "test-owner" }]) {
+    const response = await operations("/api/ops/pilots", { headers }, bindings);
+    assert.equal(response.status, 403);
+    assert.match(response.headers.get("cache-control"), /no-store/);
+  }
+  assert.equal((await operations("/api/ops/pilots")).status, 403);
+});
+
+test("operator API requires identity, same-origin and explicit cleanup confirmation", async () => {
+  let writes = 0;
+  const bindings = { PILOT_OPERATOR_USER_ID: "test-owner", DB: { prepare(query) {
+    return { all: async () => ({ results: [] }), run: async () => { writes++; assert.match(query, /created_at < datetime\('now', '-90 days'\)/); return { meta: { changes: 0 } }; } };
+  } } };
+  const headers = { "oai-authenticated-user-id": "test-owner", "oai-authenticated-user-email": "%@example.invalid" };
+  const read = await operations("/api/ops/pilots", { headers }, bindings);
+  assert.equal(read.status, 200);
+  assert.deepEqual((await read.json()).requests, []);
+  for (const origin of ["https://malicious.example", undefined]) {
+    const response = await operations("/api/ops/pilots", { method: "POST", headers: { ...headers, ...(origin ? { origin } : {}) }, body: new URLSearchParams({ confirm: "delete-expired" }) }, bindings);
+    assert.equal(response.status, 403);
+  }
+  const missing = await operations("/api/ops/pilots", { method: "POST", headers: { ...headers, origin: "https://gridrudder.com" }, body: new URLSearchParams() }, bindings);
+  assert.equal(missing.status, 400);
+  assert.equal(writes, 0);
+  const confirmed = await operations("/api/ops/pilots", { method: "POST", headers: { ...headers, origin: "https://gridrudder.com" }, body: new URLSearchParams({ confirm: "delete-expired" }) }, bindings);
+  assert.equal(confirmed.status, 200);
+  assert.equal(writes, 1);
+});
 
 test("renders the approved proof-brief page and qualified evidence", async () => {
   const response = await render();

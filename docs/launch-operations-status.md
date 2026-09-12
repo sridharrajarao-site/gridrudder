@@ -7,18 +7,25 @@
   contained one synthetic QA record and no real requests when checked today.
 - Intake validates fields and consent, stores requests, and removes records older
   than 90 days when another request is submitted.
-- The form currently has no email-notification integration. Database storage is
-  not evidence that an operator received a notification.
+- Cloudflare reports the pilot forwarding rule active and its Gmail destination
+  verified. A synthetic email test was sent; Cloudflare's activity log reported
+  Forwarded. A separately visible Gmail inbox copy was not established.
+- A daily read-only lead check is configured in the owner's local app, reporting
+  new real leads here. This is not a site-native email notification integration
+  or an always-on hosted service. Database storage alone is not notification.
+- Restricted `/ops` and `/api/ops/pilots` surfaces now support current-request
+  review and explicitly confirmed deletion of records older than 90 days. They
+  reject all access until `PILOT_OPERATOR_USER_ID` matches the authenticated
+  site-specific owner ID. Authorization is not inferred from sign-in alone.
 
 ## Needs completion
 
-- Cloudflare sign-in is required to inspect the forwarding rule and verified
-  destination for `pilot@gridrudder.com`.
-- Confirm end-to-end delivery using an authorized test message. No new message
-  was sent during this check; an empty Gmail search is inconclusive.
-- Establish an authenticated lead-review and notification path before outreach.
-- Assign monthly retention review and a deletion execution path. Opportunistic
-  cleanup on inserts alone does not enforce retention during quiet periods.
+- Owner identity is configured outside source. Live owner sign-in reaches the
+  operations page; anonymous API access returns 403 with private/no-store.
+  Validate authorized record rendering after the final UI publication.
+- Scheduled deletion is not configured. The operator cleanup action and
+  opportunistic insert cleanup do not guarantee retention during quiet periods.
+- Validate notifications on a real scheduled run; keep the local app available.
 - Conduct the next GPU trial only after the integrated runner, authorization,
   workload, telemetry and restoration behavior pass review.
 

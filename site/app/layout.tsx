@@ -22,7 +22,7 @@ export function generateMetadata(): Metadata {
     title,
     description,
     alternates: { canonical },
-    icons: { icon: [{ url: "/favicon.svg", type: "image/svg+xml" }, { url: "/favicon.ico", type: "image/x-icon" }], shortcut: "/favicon.ico" },
+    icons: { icon: [{ url: "/steered-grid.png", type: "image/png" }], shortcut: "/steered-grid.png" },
     openGraph: { title, description, url: canonical, type: "website", siteName: "GridRudder", images: [{ url: socialImage, width: 2048, height: 1080, alt: "GridRudder supervised GPU power orchestration" }] },
     twitter: { card: "summary_large_image", title, description, images: [socialImage] },
   };
