@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gridrudder.com/schemas/read-only-qualification-config-v1.json",
+  "title": "GridRudder local read-only qualification configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "host_id", "chassis_id", "gpu_uuid", "meter_id", "physical_boundary",
+    "gpu_source_epoch", "bmc_source_epoch", "nvidia_smi_path", "ipmitool_path",
+    "clock_synchronized", "samples", "sample_interval_seconds", "maximum_skew_seconds",
+    "minimum_coverage", "maximum_observation_age_seconds", "maximum_ingest_latency_ms",
+    "overhead_fixed_watts", "overhead_dynamic_fraction", "minimum_boundary_delta_watts",
+    "maximum_boundary_delta_watts", "calibration_id"
+  ],
+  "properties": {
+    "schema": {"const": "gridrudder-read-only-qualification-config:v1"},
+    "host_id": {"type": "string", "minLength": 1},
+    "chassis_id": {"type": "string", "minLength": 1},
+    "gpu_uuid": {"type": "string", "pattern": "^GPU-[A-Za-z0-9-]+$"},
+    "meter_id": {"type": "string", "minLength": 1},
+    "physical_boundary": {"type": "string", "minLength": 1},
+    "gpu_source_epoch": {"type": "string", "minLength": 1},
+    "bmc_source_epoch": {"type": "string", "minLength": 1},
+    "nvidia_smi_path": {"type": "string", "pattern": "^/"},
+    "ipmitool_path": {"type": "string", "pattern": "^/"},
+    "clock_synchronized": {"const": true},
+    "samples": {"type": "integer", "minimum": 3, "maximum": 3600},
+    "sample_interval_seconds": {"type": "number", "minimum": 0, "maximum": 60},
+    "maximum_skew_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 10},
+    "minimum_coverage": {"type": "number", "minimum": 0.9, "maximum": 1},
+    "maximum_observation_age_seconds": {"type": "number", "minimum": 0, "maximum": 60},
+    "maximum_ingest_latency_ms": {"type": "number", "minimum": 0, "maximum": 60000},
+    "overhead_fixed_watts": {"type": "number", "minimum": 0},
+    "overhead_dynamic_fraction": {"type": "number", "minimum": 0},
+    "minimum_boundary_delta_watts": {"type": "number"},
+    "maximum_boundary_delta_watts": {"type": "number"},
+    "calibration_id": {"type": "string", "minLength": 1}
+  }
+}

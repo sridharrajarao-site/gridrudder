@@ -56,8 +56,8 @@ class PerformanceTrialTests(unittest.TestCase):
 
     @staticmethod
     def runner(phase, repetition, duration):
-        watts = 200.0 if phase == "baseline" else 150.0
-        units = 1000.0 if phase == "baseline" else 900.0
+        watts = 150.0 if phase.startswith("capped") else 200.0
+        units = 900.0 if phase.startswith("capped") else 1000.0
         samples = tuple(MeterSample(t, watts, (NOW + timedelta(seconds=t)).isoformat(),
                                     "bmc:host-a", "chassis-a")
                         for t in (0.0, duration / 2, duration))
@@ -72,11 +72,94 @@ class PerformanceTrialTests(unittest.TestCase):
                 workload_runner=self.runner, verify_authorization=lambda _: True,
                 attended_confirmation=lambda phrase: phrase,
                 lock_directory=Path(directory), workload_artifact_path=artifact, now=lambda: NOW)
-            self.assertEqual([125.0, 175.0], control.calls)
+            self.assertEqual([125.0, 175.0, 175.0], control.calls)
             self.assertEqual(100.0, result.baseline[0].throughput_per_second)
             self.assertEqual(90.0, result.capped[0].throughput_per_second)
             self.assertEqual(2000.0, result.baseline[0].host_energy_joules)
+            self.assertEqual(2, len(result.restored_samples))
+            self.assertEqual(100.0, result.restored_samples[0].throughput_per_second)
+            self.assertEqual(2.0, result.restored_samples[0].joules_per_useful_unit)
             self.assertTrue(result.restored)
+
+    def test_restored_workload_failure_reasserts_original_limit(self):
+        with tempfile.TemporaryDirectory() as directory:
+            artifact = self.artifact(directory); config = self.bound_config(artifact); control = Control()
+            def failing(phase, repetition, duration):
+                if phase == "restored":
+                    raise RuntimeError("restored workload failed")
+                return self.runner(phase, repetition, duration)
+            with self.assertRaisesRegex(PerformanceTrialError, "failed safely"):
+                run_attended_performance_trial(config, self.authorization(config),
+                    audit_log=AuditLog(Path(directory)/"a"), control=control,
+                    workload_runner=failing, verify_authorization=lambda _: True,
+                    attended_confirmation=lambda phrase: phrase, lock_directory=Path(directory),
+                    workload_artifact_path=artifact, now=lambda: NOW)
+            self.assertEqual([125.0, 175.0, 175.0], control.calls)
+            self.assertEqual(175.0, control.limit)
+
+    def test_nan_cap_observation_stops_work_and_restores(self):
+        with tempfile.TemporaryDirectory() as directory:
+            artifact = self.artifact(directory); config = self.bound_config(artifact)
+            class NanControl(Control):
+                def observe_limit(self, gpu_uuid):
+                    return float("nan") if self.limit == 125 else self.limit
+            control = NanControl()
+            phases = []
+            def runner(phase, repetition, duration):
+                phases.append(phase)
+                return self.runner(phase, repetition, duration)
+            with self.assertRaisesRegex(PerformanceTrialError, "capped limit"):
+                run_attended_performance_trial(config, self.authorization(config),
+                    audit_log=AuditLog(Path(directory)/"a"), control=control,
+                    workload_runner=runner, verify_authorization=lambda _: True,
+                    attended_confirmation=lambda phrase: phrase, lock_directory=Path(directory),
+                    workload_artifact_path=artifact, now=lambda: NOW)
+            self.assertNotIn("capped_warmup", phases)
+            self.assertEqual(175.0, control.limit)
+
+    def test_expiry_during_baseline_prevents_cap(self):
+        with tempfile.TemporaryDirectory() as directory:
+            artifact = self.artifact(directory); config = self.bound_config(artifact); control = Control()
+            times = iter((NOW, NOW + timedelta(minutes=6)))
+            with self.assertRaisesRegex(PerformanceTrialError, "expired before"):
+                run_attended_performance_trial(config, self.authorization(config),
+                    audit_log=AuditLog(Path(directory)/"a"), control=control,
+                    workload_runner=self.runner, verify_authorization=lambda _: True,
+                    attended_confirmation=lambda phrase: phrase, lock_directory=Path(directory),
+                    workload_artifact_path=artifact, now=lambda: next(times))
+            self.assertEqual([], control.calls)
+
+    def test_nonfinite_meter_time_prevents_cap(self):
+        with tempfile.TemporaryDirectory() as directory:
+            artifact = self.artifact(directory); config = self.bound_config(artifact); control = Control()
+            def invalid(phase, repetition, duration):
+                raw = self.runner(phase, repetition, duration)
+                middle = MeterSample(float("nan"), 200.0,
+                    (NOW + timedelta(seconds=5)).isoformat(), "bmc:host-a", "chassis-a")
+                return WorkSample(raw.useful_units, duration,
+                    (raw.meter_samples[0], middle, raw.meter_samples[-1]))
+            with self.assertRaisesRegex(PerformanceTrialError, "elapsed times must be finite"):
+                run_attended_performance_trial(config, self.authorization(config),
+                    audit_log=AuditLog(Path(directory)/"a"), control=control,
+                    workload_runner=invalid, verify_authorization=lambda _: True,
+                    attended_confirmation=lambda phrase: phrase, lock_directory=Path(directory),
+                    workload_artifact_path=artifact, now=lambda: NOW)
+            self.assertEqual([], control.calls)
+
+    def test_workload_mutation_during_baseline_prevents_cap(self):
+        with tempfile.TemporaryDirectory() as directory:
+            artifact = self.artifact(directory); config = self.bound_config(artifact); control = Control()
+            def mutate(phase, repetition, duration):
+                if phase == "baseline":
+                    artifact.write_bytes(b"changed-workload")
+                return self.runner(phase, repetition, duration)
+            with self.assertRaisesRegex(PerformanceTrialError, "changed before cap"):
+                run_attended_performance_trial(config, self.authorization(config),
+                    audit_log=AuditLog(Path(directory)/"a"), control=control,
+                    workload_runner=mutate, verify_authorization=lambda _: True,
+                    attended_confirmation=lambda phrase: phrase, lock_directory=Path(directory),
+                    workload_artifact_path=artifact, now=lambda: NOW)
+            self.assertEqual([], control.calls)
 
     def test_wrong_binding_or_confirmation_prevents_mutation(self):
         with tempfile.TemporaryDirectory() as directory:

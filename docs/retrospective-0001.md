@@ -4,6 +4,8 @@ Date: 2026-09-12
 Authority: Chief Architect  
 Scope: every material commitment made during research, product definition, implementation, hardware trial, naming, launch, and pilot preparation.
 
+Status update, 2026-09-12: the sanitized Apache-2.0 source repository is now public at [github.com/sridharrajarao-site/gridrudder](https://github.com/sridharrajarao-site/gridrudder). Statements below about test totals remain dated records of this review, not current suite counts. Statements that no public repository existed are superseded by this update; the remaining release-provenance and operations gaps still apply.
+
 ## Executive verdict
 
 GridRudder has a credible simulator, a guarded software architecture, one attended physical actuation observation, a registered domain, a public website, and an Apache-2.0 codebase in preparation. It is not yet a production product, a fleet controller, or a repeatably proven commercial offering.
@@ -17,12 +19,12 @@ The largest process miss was allowing visible progress—one physical test, a li
 | Problem research | Industry, software-gap, vendor, and buyer analysis in `docs/` | Complete for initial thesis; refresh before fundraising or procurement |
 | Architecture | Power, compute/product, and assurance councils; ADRs; architect decisions | Complete for simulator and attended-lab scope |
 | Simulator | Deterministic planner, policy guard, telemetry gating, sessions, audit, fault injection, trace verifier | Simulator Gate B GO |
-| Verification | 201 unit/integration tests and fresh 21/21 independently reverified release packet | Passing locally |
+| Verification | 201 unit/integration tests and fresh 21/21 independently reverified release packet | Historical result from this dated review; not the current suite total |
 | Physical observation | Audit records 156.22→124.37 W GPU, 291→260 W server, and restoration | Valid only for that single attended observation |
 | Brand | GridRudder selected; `gridrudder.com` registered | Complete |
 | Contact | `pilot@gridrudder.com` routes to the founder's existing mailbox | Active; end-to-end delivery test still required |
 | Website | Public GridRudder site and pilot intake | Live; evidence/retention corrections in progress |
-| License | Apache-2.0 license and open-core boundary | Locally prepared; no public repository yet |
+| License | Apache-2.0 license and open-core boundary | Public source repository now available; signed immutable release provenance remains open |
 
 ## Miss ledger
 
@@ -36,7 +38,7 @@ The largest process miss was allowing visible progress—one physical test, a li
 
 ### P0 — must close before public-source release
 
-6. **The repository is not actually public.** Apache-2.0 intent and files are present, but no public Git host, signed release, or immutable public tag exists.
+6. **Public repository publication is closed; release provenance remains open.** The sanitized Apache-2.0 source is public at [github.com/sridharrajarao-site/gridrudder](https://github.com/sridharrajarao-site/gridrudder), but no signed immutable public release/tag has been evidenced in this review.
 7. **Private physical evidence cannot ship.** The retained artifact contains operator identity, exact timestamps, approval identity, and GPU UUID.
 8. **History-level sanitation is incomplete.** The project root lacks a reviewable Git history; nested site history and dependency/build directories must not enter the release.
 9. **Release operations are incomplete.** No protected branch, DCO enforcement, issue/PR templates, signed artifacts, dependency/license inventory, or tested private vulnerability workflow is active on a public host.
@@ -73,7 +75,7 @@ The largest process miss was allowing visible progress—one physical test, a li
 2. Complete the attended performance harness and independent safety review; do not rerun hardware until P0 approval, provenance, meter identity, locking, health, and restoration gates pass.
 3. Decide whether to terminate the current rental after preserving required non-secret evidence; rotate any exposed credential.
 4. Build and independently scan a deterministic public-source archive that excludes private evidence and nested metadata.
-5. Obtain explicit authorization before creating the public repository; then enable branch protection, DCO, templates, and signed release provenance.
+5. Maintain the public repository with branch protection, DCO, templates, dependency/security review, and signed release provenance.
 6. Recruit one design partner for a read-only discovery, then an attended test only after site-specific approval.
 7. Measure useful work and repeatability across multiple windows before making savings or performance claims.
 8. Add a real grid/facility signal plus one scheduler integration before describing the product as end-to-end orchestration.

@@ -1,6 +1,18 @@
 # Next GPU test execution plan
 
-Status: **NO-GO for another write today. GO for read-only qualification.**
+Status: **Prepare locally before renting again. Hardware writes remain NO-GO until the adapter and workload are reviewed.**
+
+## Local progress (2026-09-12)
+
+The injected, hardware-free performance runner now collects repeated baseline,
+capped, and restored useful-work windows. Each window reports throughput,
+trapezoid-integrated whole-server joules, average watts, and joules per useful
+unit. It verifies the restored cap before restored workload collection and
+reasserts the original cap in cleanup, including when restored collection fails.
+Non-finite cap observations and elapsed meter times fail closed. Authorization
+expiry and the workload digest are rechecked immediately before lowering the cap.
+These are tested software behaviors, not a new physical experiment or proof of
+efficiency. The runner's authorization callback still needs a real verifier.
 
 ## Objective
 
@@ -20,7 +32,7 @@ Measure whether a bounded NVIDIA GPU power cap reduces independently measured se
 
 No power-limit write occurs in this phase.
 
-1. Confirm the server is still active and record its current billing state.
+1. Only rent after the local checklist is complete; record rate and a planned termination time.
 2. Rotate any credential that appeared in interactive history.
 3. Record OS, physical-host evidence, NVIDIA inventory, driver, GPU UUID, power range, MIG, health, and throttling state.
 4. Record BMC/DCMI identity and at least 60 seconds of timestamped power samples.
@@ -35,7 +47,7 @@ Failure of identity, provenance, health, meter freshness, clock alignment, or wo
 2. One conservative cap step inside the device/provider-approved range.
 3. Two or more capped repetitions with the identical workload artifact.
 4. Immediate restoration of the original cap in every exit path.
-5. Post-restore health, power-limit, workload-digest, and meter verification.
+5. Restore, warm up, and collect the same number of unchanged-power useful-work windows; then reassert and verify the original cap. Post-restore health checks remain an adapter requirement.
 6. Independent report of throughput, average host watts, host joules/useful-unit, variance, errors, and all limitations.
 
 ## Pass conditions
@@ -45,6 +57,40 @@ Failure of identity, provenance, health, meter freshness, clock alignment, or wo
 - Baseline and capped windows are comparable and repeated.
 - Useful-work impact and energy impact are both reported; utilization is not used as a proxy for throughput.
 - The complete primary evidence can be independently recomputed.
+
+## Focused next experiment and report
+
+Use one fixed-input workload whose completed, validated jobs can be counted.
+Keep input, batch size, precision, software versions, and warmup identical.
+Start with three 60-second windows per phase after 30-second warmups. Configure
+the signed authorization window to cover the complete session. These timings
+are a starting protocol; qualification must show that the meter cadence is
+sufficient and temperatures have settled before approving the final protocol.
+
+For each phase publish completed jobs, elapsed seconds, jobs/second, whole-server
+joules, joules/completed job, error count, and per-job latency percentiles if the
+workload records them. Compute aggregate throughput as total jobs / total time
+and aggregate energy intensity as total joules / total jobs, not an unweighted
+average of ratios. Report all individual windows and variability. Do not mix
+GPU-board energy with whole-server energy. Compare restored throughput and energy
+against baseline to expose drift; a fixed baseline/capped/restored sequence alone
+does not eliminate temperature or time-order effects. Repeat full cycles before
+claiming a repeatable effect. The current WorkSample interface does not yet
+carry job validation, errors, or latency samples; that integration remains open.
+
+## Remaining prerequisites before paying for another session
+
+- Reviewed physical control adapter with pinned executables, range/health checks,
+  bounded command timeouts, and independently verified restoration.
+- Real signed authorization verifier and durable one-use nonce handling; the
+  injected callback and advisory lock are not a complete security boundary.
+- Packaged deterministic workload with synchronized GPU timing and validated
+  completed-job counts; latency/error evidence and stop conditions.
+- Meter/workload acquisition integration, freshness and clock-alignment checks,
+  and recomputable persisted primary evidence (including failed attempts).
+- Failure tests of those real adapters using fake processes before deployment.
+- One scheduled attended session with a confirmed compatible meter, price,
+  export location, stop time, and termination plan.
 
 ## After the test
 

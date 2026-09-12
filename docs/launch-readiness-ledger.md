@@ -2,11 +2,11 @@
 
 Date: 2026-09-12
 
-This ledger reconciles the commitments made during the prototype, hardware-validation, open-source, website, and go-to-market work with artifacts that exist now. “Done” means locally evidenced, not externally published or production-ready.
+This ledger reconciles the commitments made during the prototype, hardware-validation, open-source, website, and go-to-market work with artifacts that exist now. “Done” means evidenced, not production-ready. Repository-publication status was refreshed after the original review on 2026-09-12.
 
 ## Executive state
 
-GridRudder has a credible simulator-first safety core, a single-host physical mechanism result, an Apache-2.0 open-source package, and a design-partner website/intake implementation. It does not yet have a public source repository, a repeatable supported hardware integration, validated workload-performance results, a design partner, or a hosted fleet control plane. The honest market offer remains a supervised design-partner evaluation.
+GridRudder has a credible simulator-first safety core, a single-host physical mechanism result, an Apache-2.0 repository public at [github.com/sridharrajarao-site/gridrudder](https://github.com/sridharrajarao-site/gridrudder), and a design-partner website/intake implementation. It does not yet have a repeatable supported hardware integration, validated workload-performance results, a design partner, or a hosted fleet control plane. The honest market offer remains a supervised design-partner evaluation.
 
 ## Priority 0 — must resolve before accepting public submissions or hardware pilots
 
@@ -21,11 +21,11 @@ GridRudder has a credible simulator-first safety core, a single-host physical me
 
 | Commitment | Evidence now | State | Required closure |
 | --- | --- | --- | --- |
-| Release open components under Apache-2.0 | `LICENSE`, `NOTICE`, open-core boundary, contribution/security/conduct docs, safe quickstart | **Locally done** | Legal/provenance review remains. The source is not open source to users until it is actually distributed. |
-| Publish a sanitized repository | `.gitignore`, `.gitattributes`, and `tools/build_public_release.py` exclude private evidence, nested Git state, dependencies, build output, deployment metadata, and caches | **Locally packaged** | Review generated manifest/archive, then create an external repository only with separate authorization. Do not import unscanned nested history. |
+| Release open components under Apache-2.0 | `LICENSE`, `NOTICE`, open-core boundary, contribution/security/conduct docs, safe quickstart, and the [public repository](https://github.com/sridharrajarao-site/gridrudder) | **Published** | Legal/provenance review and signed release provenance remain. Public source availability does not imply production support or that future hosted components are open source. |
+| Publish a sanitized repository | The sanitized source is public at [github.com/sridharrajarao-site/gridrudder](https://github.com/sridharrajarao-site/gridrudder); `.gitignore`, `.gitattributes`, and `tools/build_public_release.py` exclude private evidence, nested Git state, dependencies, build output, deployment metadata, and caches | **Published** | Continue history-aware secret/provenance review and verify each release manifest. Do not import unscanned nested history or private evidence. |
 | Consistent public name and domain | ADR-0003 accepts GridRudder; README and active launch docs use it; site canonical uses `https://gridrudder.com` | **Partial** | Verify registration, DNS, TLS, production routing, and formal trademark clearance externally. Historical naming ADRs remain intentionally unchanged. |
-| Accurate automated-test claim | Current local Python suite passes 209 tests; the site distinguishes the physical-trial build from later code but its later-suite count is already stale | **Gap in site copy** | Preserve the historical count only if its test output is retained; generate current counts during release or avoid hard-coded current counts. Test count is software verification, not hardware evidence. |
-| Website release verification | Production site build completes, but `site/tests/rendered-html.test.mjs` still asserts the removed starter skeleton and references deleted preview files | **Failing** | Replace starter-template tests with assertions for GridRudder content, privacy, evidence qualifiers, form behavior, metadata, accessibility, and failure states; require them in CI. |
+| Accurate automated-test claim | The site no longer publishes a volatile numeric suite count. The 209-test result below is a dated 2026-09-12 record, not a current total or hardware claim. | **Closed in site copy** | Keep dated test records immutable; derive any future current count during release rather than hard-coding it in marketing copy. |
+| Website release verification | The production proof-brief source has GridRudder-specific rendered assertions for evidence qualifiers, control boundaries, intake/privacy, and metadata; its promotion build, lint, and rendered tests passed locally | **Passing locally** | Require the same checks in CI and re-run them against the deployed production artifact. |
 | Installable open-source product | Repository runs from source with Python 3.9+ and no core third-party packages | **Partial** | Add packaging metadata, versioning, reproducible installation, upgrade/removal docs, release signing, and CI. There is no supported daemon/service package yet. |
 
 ## Priority 2 — required before broader go-to-market claims
@@ -41,7 +41,7 @@ GridRudder has a credible simulator-first safety core, a single-host physical me
 
 ## Delivered artifacts
 
-- Deterministic simulator, policy/safety logic, replay, audit verification, fault matrices, release evidence, and 209 passing Python tests as of this ledger date.
+- Deterministic simulator, policy/safety logic, replay, audit verification, fault matrices, release evidence, and a historical record of 209 passing Python tests on 2026-09-12. This is not the current suite total.
 - Read-only NVIDIA probe and disabled legacy hardware-trial CLI.
 - Library-level attended performance boundary with scoped authorization and restoration safeguards.
 - One private physical audit artifact proving a bounded change and independent host-watt response on one trial.
@@ -52,7 +52,7 @@ GridRudder has a credible simulator-first safety core, a single-host physical me
 
 ## Explicit non-deliveries
 
-- No external source repository was created or published.
+- No signed immutable public release or supported binary distribution exists; source is public at [github.com/sridharrajarao-site/gridrudder](https://github.com/sridharrajarao-site/gridrudder).
 - No design-partner outreach was performed in this workstream.
 - No production or autonomous control system exists.
 - No facility-equipment control path exists.
@@ -62,7 +62,7 @@ GridRudder has a credible simulator-first safety core, a single-host physical me
 ## Next decision sequence
 
 1. Close intake retention and mailbox operations before collecting public submissions.
-2. Reconcile the website’s evidence and test-count copy with a reviewed evidence packet.
-3. Review the generated source archive for provenance/legal/trademark issues and publish only under separate authorization.
+2. Produce a reviewed, consented public evidence packet without reintroducing a volatile test-count claim.
+3. Continue provenance/legal/trademark review of the public repository and establish signed release artifacts.
 4. Productize and run the new performance boundary on the current lab host, then one partner-controlled host.
 5. Use partner requirements to choose one scheduler integration and define the smallest paid hosted-control-plane slice.

@@ -26,8 +26,8 @@ Requires Python 3.9 or newer and no third-party packages.
 python3 -m gridgpu demo --output artifacts/demo.jsonl
 python3 -m gridgpu benchmark
 python3 -m gridgpu probe-nvidia
-python3 -m gridgpu verify-audit artifacts/audit.jsonl
 python3 -m gridgpu gate-b-release --output artifacts/gate-b-release
+python3 -m gridgpu verify-audit artifacts/gate-b-release/release-audit.jsonl
 python3 -m unittest discover -s tests -v
 ```
 
@@ -56,8 +56,14 @@ dependencies, or build state:
 
 ```bash
 python3 tools/build_public_release.py
+python3 tools/verify_public_release.py dist/gridrudder-public-preview.tar.gz
 ```
 
 This creates `dist/gridrudder-public-preview.tar.gz`, a sidecar checksum, and
 an internal per-file SHA-256 manifest. Building it does not publish a
 repository or authorize a hardware trial.
+
+The verifier checks the archive checksum and every file against its internal
+manifest, then runs the simulator, audit verification, and benchmark from an
+isolated extracted copy. It executes source from the archive: use only a trusted
+build. Checksums establish integrity, not publisher identity.

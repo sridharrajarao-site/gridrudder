@@ -40,6 +40,8 @@ jobs:
       - name: Verify public-package checksum
         working-directory: dist
         run: sha256sum --check gridrudder-public-preview.tar.gz.sha256
+      - name: Verify archive contents and isolated quickstart
+        run: python tools/verify_public_release.py dist/gridrudder-public-preview.tar.gz
       - name: Upload public-package candidate
         if: matrix.python-version == '3.12'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
