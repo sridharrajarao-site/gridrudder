@@ -1,5 +1,6 @@
 import { sites } from "@openai/sites-vite-plugin";
 import vinext from "vinext";
+import { existsSync } from "node:fs";
 import { defineConfig } from "vite";
 
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
@@ -52,7 +53,9 @@ export default defineConfig(async () => {
       : undefined,
     plugins: [
       vinext(),
-      sites(),
+      // The public source archive deliberately excludes deployer-owned Sites
+      // metadata. Keep the ordinary open-source build usable without it.
+      ...(existsSync(".openai/hosting.json") ? [sites()] : []),
       cloudflare({
         viteEnvironment: { name: "rsc", childEnvironments: ["ssr"] },
         config: localBindingConfig,
