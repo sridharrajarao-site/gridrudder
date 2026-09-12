@@ -52,7 +52,7 @@ export default function Home() {
         <section className="method">
           <div><span>07 / METHODOLOGY</span><h2>Evidence, not inference.</h2></div>
           <ol><li><b>Baseline.</b> Warm GPU load and capture timestamped GPU and BMC readings.</li><li><b>Intervention.</b> Reduce the GPU power limit from 175 W to 125 W under attended control.</li><li><b>Observation.</b> Record GPU power at 124.37 W and independent server power at 260 W.</li><li><b>Recovery.</b> Restore the original 175 W limit and confirm the system returns to the prior state.</li></ol>
-          <p>Software verification at the physical trial: 195 automated tests passed. The current suite has 203 tests; that later count is not part of the physical trial evidence. Hardware figures are observations from the single attended session above, not generalized savings guarantees.</p>
+          <p>Software verification at the physical trial: 195 automated tests passed. That historical count is not a claim about the current suite. Hardware figures are observations from the single attended session above, not generalized savings guarantees.</p>
         </section>
 
         <section className="intake" id="intake">

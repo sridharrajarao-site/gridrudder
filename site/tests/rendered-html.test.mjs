@@ -27,7 +27,7 @@ test("renders the current GridRudder marketing page and qualified evidence", asy
   assert.match(html, /291[^<]*→[^<]*260 W/i);
   assert.match(html, /195[^<]*\/[^<]*195/i);
   assert.match(html, /trial-build software tests passed/i);
-  assert.match(html, /current suite has 203 tests/i);
+  assert.match(html, /historical count is not a claim about the current suite/i);
   assert.match(html, /GPU model and utilization come from attended session records/i);
   assert.match(html, /application throughput was not benchmarked/i);
   assert.doesNotMatch(html, /without sacrificing useful compute/i);

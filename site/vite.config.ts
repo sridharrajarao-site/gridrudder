@@ -1,12 +1,15 @@
 import { sites } from "@openai/sites-vite-plugin";
 import vinext from "vinext";
 import { defineConfig } from "vite";
-import hostingConfig from "./.openai/hosting.json";
 
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
   "00000000-0000-4000-8000-000000000000";
 
-const { d1, r2 } = hostingConfig;
+// Keep the deployer-owned `.openai/hosting.json` out of the public source
+// contract. GridRudder uses the stable logical binding name `DB`; the Sites
+// runtime resolves that binding to the deployed database.
+const d1 = process.env.SITES_D1_BINDING ?? "DB";
+const r2: string | null = null;
 
 // macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
