@@ -13,23 +13,28 @@ async function render(path = "/") {
   );
 }
 
-test("renders the current GridRudder marketing page and qualified evidence", async () => {
+test("renders the approved proof-brief page and qualified evidence", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>GridRudder — Make every watt work<\/title>/i);
-  assert.match(html, /<h1[^>]*>GridRudder — Make every watt work<\/h1>/i);
-  assert.match(html, /<img[^>]+alt="GridRudder: Make every watt work\. A supervised control loop connects the power grid to GPU servers\."/i);
-  assert.match(html, /Supervised control loop connects the power grid to GPU servers/i);
+  assert.match(html, /<title>GridRudder — Supervised GPU power orchestration<\/title>/i);
+  assert.match(html, /GPU power\.[\s\S]*Under your control/i);
   assert.match(html, /156\.22[^<]*→[^<]*124\.37 W/i);
   assert.match(html, /291[^<]*→[^<]*260 W/i);
-  assert.match(html, /195[^<]*\/[^<]*195/i);
-  assert.match(html, /trial-build software tests passed/i);
-  assert.match(html, /historical count is not a claim about the current suite/i);
-  assert.match(html, /GPU model and utilization come from attended session records/i);
-  assert.match(html, /application throughput was not benchmarked/i);
+  assert.match(html, /Independent BMC whole-server observation/i);
+  assert.match(html, /HISTORICAL OBSERVATION—NOT LIVE/i);
+  assert.match(html, /Throughput was not measured/i);
+  assert.match(html, /savings are not guaranteed/i);
+  assert.match(html, /NO FACILITY WRITE ACCESS/i);
+  assert.match(html, /NO AUTONOMOUS PRODUCTION CONTROL/i);
+  assert.match(html, /Request a compatibility review/i);
+  assert.match(html, /ATTENDED TEST ONLY/i);
+  assert.match(html, /only after separate approval/i);
+  assert.match(html, /The local agent, simulator, and safety tooling are available on GitHub/i);
+  assert.match(html, /href="https:\/\/github\.com\/sridharrajarao-site\/gridrudder"/i);
+  assert.match(html, /does not represent a hosted or fleet-control product/i);
   assert.doesNotMatch(html, /without sacrificing useful compute/i);
   assert.doesNotMatch(html, /Measured at the wall/i);
 });
@@ -44,7 +49,7 @@ test("emits production metadata and accessible pilot/privacy paths", async () =>
   assert.match(html, /<meta[^>]+name="twitter:card"[^>]+content="summary_large_image"/i);
   assert.match(html, /href="#main"[^>]*>Skip to content/i);
   assert.match(html, /<main[^>]+id="main"/i);
-  assert.match(html, /DESIGN PARTNER INTAKE/i);
+  assert.match(html, /READ-ONLY QUALIFICATION APPLICATION/i);
   assert.match(html, /pilot@gridrudder\.com/i);
   assert.match(html, /href="\/privacy"/i);
   assert.match(html, /monthly retention procedure removes requests older than 90 days/i);

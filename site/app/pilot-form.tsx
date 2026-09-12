@@ -38,7 +38,7 @@ export function PilotForm() {
       <label className="honeypot" aria-hidden="true">Company website<input name="website" tabIndex={-1} autoComplete="off" /></label>
       <label className="consent"><input name="consent" type="checkbox" value="yes" required /> <span>I agree that GridRudder may use these details to evaluate and respond to this pilot request.</span></label>
       <p id="privacy-note" className="form-note">Do not include credentials, IP addresses, or other secrets. Our monthly retention procedure removes requests older than 90 days; email pilot@gridrudder.com to request earlier deletion. See <a href="/privacy">privacy details</a>.</p>
-      <button type="submit" disabled={state === "sending"}>{state === "sending" ? "Submitting…" : "Submit pilot request"}<span aria-hidden="true">→</span></button>
+      <button type="submit" disabled={state === "sending"}>{state === "sending" ? "Submitting…" : "Request a compatibility review"}<span aria-hidden="true">→</span></button>
       <p ref={resultRef} className={`form-result ${state}`} role={state === "error" ? "alert" : state === "sent" ? "status" : undefined} aria-live="polite" tabIndex={-1}>{message}</p>
     </form>
   );

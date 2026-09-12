@@ -4,7 +4,7 @@
 
 The open-source simulator and local tools are intended to run locally. The repository does not document or promise a hosted ingestion service, and installing the local agent must not enroll a host or enable telemetry upload. Any future network collection requires a separate, explicit configuration and privacy review.
 
-The public pilot-intake form stores name, work email, organization, environment category, goal, and submission time solely to evaluate and respond to the request. Intake records are retained for no more than 90 days and may be deleted sooner by emailing `pilot@gridrudder.com`. Applicants are instructed not to submit credentials, IP addresses, or other secrets.
+The public pilot-intake form stores name, work email, organization, environment category, goal, and submission time solely to evaluate and respond to the request. The retention target is 90 days. The current implementation removes older records when a new submission is stored; the operations procedure also calls for a monthly cleanup. There is no confirmed scheduled deletion job enforcing a strict 90-day maximum, so low submission traffic or a missed manual cleanup can leave records longer. Applicants may request earlier deletion by emailing `pilot@gridrudder.com` and are instructed not to submit credentials, IP addresses, or other secrets. Public retention wording must reflect these limits until scheduled cleanup is implemented and verified.
 
 ## Data the tools may produce
 

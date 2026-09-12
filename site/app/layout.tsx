@@ -15,15 +15,15 @@ const geistMono = Geist_Mono({
 export function generateMetadata(): Metadata {
   const canonical = "https://gridrudder.com";
   const socialImage = `${canonical}/og.png`;
-  const title = "GridRudder — Make every watt work";
-  const description = "Supervised GPU power orchestration with operator-approved actions and independent BMC verification.";
+  const title = "GridRudder — Supervised GPU power orchestration";
+  const description = "Supervised GPU power orchestration with attended operator confirmation and comparison with independent BMC whole-server telemetry.";
   return {
     metadataBase: new URL(canonical),
     title,
     description,
     alternates: { canonical },
     icons: { icon: [{ url: "/favicon.svg", type: "image/svg+xml" }, { url: "/favicon.ico", type: "image/x-icon" }], shortcut: "/favicon.ico" },
-    openGraph: { title, description, url: canonical, type: "website", siteName: "GridRudder", images: [{ url: socialImage, width: 2048, height: 1080, alt: "GridRudder: Make every watt work" }] },
+    openGraph: { title, description, url: canonical, type: "website", siteName: "GridRudder", images: [{ url: socialImage, width: 2048, height: 1080, alt: "GridRudder supervised GPU power orchestration" }] },
     twitter: { card: "summary_large_image", title, description, images: [socialImage] },
   };
 }
@@ -39,6 +39,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <aside className="source-disclosure" aria-label="Open-source project">
+          <span>OPEN-SOURCE LOCAL TOOLING</span>
+          <p>The local agent, simulator, and safety tooling are available on GitHub. This does not represent a hosted or fleet-control product.</p>
+          <a href="https://github.com/sridharrajarao-site/gridrudder">Review the source →</a>
+        </aside>
       </body>
     </html>
   );

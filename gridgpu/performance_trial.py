@@ -64,7 +64,7 @@ class PerformanceTrialConfig:
         for value in (self.target_power_limit_watts, self.warmup_seconds, self.sample_seconds):
             if not math.isfinite(value) or value <= 0:
                 raise ValueError("power and durations must be finite and positive")
-        if isinstance(self.repetitions, bool) or self.repetitions < 2:
+        if isinstance(self.repetitions, bool) or not isinstance(self.repetitions, int) or self.repetitions < 2:
             raise ValueError("at least two repetitions are required")
 
 
@@ -127,6 +127,7 @@ class PerformanceTrialResult:
     target_power_limit_watts: float
     baseline: tuple[PhaseResult, ...]
     capped: tuple[PhaseResult, ...]
+    restored_samples: tuple[PhaseResult, ...]
     restored: bool
     restored_limit_watts: float
     restored_at_utc: str
@@ -201,6 +202,8 @@ def _measure(phase: str, repetition: int, raw: WorkSample,
     if abs(raw.duration_seconds - expected_duration) > max(1.0, expected_duration * 0.05):
         raise PerformanceTrialError("workload duration departed from the authorized window")
     samples = raw.meter_samples
+    if any(not math.isfinite(sample.elapsed_seconds) for sample in samples):
+        raise PerformanceTrialError("meter elapsed times must be finite")
     if len(samples) < 3 or samples[0].elapsed_seconds != 0 or abs(samples[-1].elapsed_seconds - raw.duration_seconds) > 1e-6:
         raise PerformanceTrialError("meter evidence must span the window with at least three samples")
     source = samples[0].source_id
@@ -247,7 +250,7 @@ def run_attended_performance_trial(
     workload_artifact_path: Path,
     now: Callable[[], datetime] = lambda: datetime.now(timezone.utc),
 ) -> PerformanceTrialResult:
-    """Compare baseline/capped useful work; restore the original cap on every path."""
+    """Compare baseline/capped/restored work; restore after any attempted change."""
 
     def workload_digest() -> str:
         if workload_artifact_path.is_symlink() or not workload_artifact_path.is_file():
@@ -300,6 +303,7 @@ def run_attended_performance_trial(
         }, actor=authorization.operator)
         baseline = []
         capped = []
+        restored_samples = []
         changed = False
         trial_error: Optional[BaseException] = None
         restore_error: Optional[BaseException] = None
@@ -309,14 +313,28 @@ def run_attended_performance_trial(
                 baseline.append(_measure("baseline", repetition,
                     workload_runner("baseline", repetition, config.sample_seconds), config.sample_seconds,
                     config.meter_source_id, config.chassis_id))
+            if _parse_expiry(authorization.expires_at_utc) <= now():
+                raise PerformanceTrialError("authorization expired before cap actuation")
+            if workload_digest() != config.workload_sha256:
+                raise PerformanceTrialError("workload artifact changed before cap actuation")
             changed = True
             control.set_limit(config.gpu_uuid, config.target_power_limit_watts)
-            if abs(control.observe_limit(config.gpu_uuid) - config.target_power_limit_watts) > 0.5:
+            observed_cap = control.observe_limit(config.gpu_uuid)
+            if not math.isfinite(observed_cap) or abs(observed_cap - config.target_power_limit_watts) > 0.5:
                 raise PerformanceTrialError("capped limit could not be verified")
             workload_runner("capped_warmup", -1, config.warmup_seconds)
             for repetition in range(config.repetitions):
                 capped.append(_measure("capped", repetition,
                     workload_runner("capped", repetition, config.sample_seconds), config.sample_seconds,
+                    config.meter_source_id, config.chassis_id))
+            control.set_limit(config.gpu_uuid, original)
+            observed_restore = control.observe_limit(config.gpu_uuid)
+            if not math.isfinite(observed_restore) or abs(observed_restore - original) > 0.5:
+                raise PerformanceTrialError("restored limit could not be verified before workload")
+            workload_runner("restored_warmup", -1, config.warmup_seconds)
+            for repetition in range(config.repetitions):
+                restored_samples.append(_measure("restored", repetition,
+                    workload_runner("restored", repetition, config.sample_seconds), config.sample_seconds,
                     config.meter_source_id, config.chassis_id))
         except BaseException as exc:
             trial_error = exc
@@ -355,7 +373,7 @@ def run_attended_performance_trial(
             raise PerformanceTrialError("workload artifact changed during the trial")
         result = PerformanceTrialResult(config.host_id, config.gpu_uuid, config.workload_id,
             config.workload_sha256, original, config.target_power_limit_watts,
-            tuple(baseline), tuple(capped), True, restored_limit, now().isoformat(),
+            tuple(baseline), tuple(capped), tuple(restored_samples), True, restored_limit, now().isoformat(),
             selected.driver_version, selected.executable_sha256)
         audit_log.append("performance_trial.completed", asdict(result), actor=authorization.operator)
         return result

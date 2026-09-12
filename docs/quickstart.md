@@ -8,7 +8,12 @@ GridRudder defaults to simulation and read-only inspection. Nothing in this quic
 - No third-party Python packages for the simulator and tests.
 - A copy of this repository on a development machine.
 
-Run commands from the `grid-to-gpu` directory.
+Run commands from the repository or extracted source root: the directory
+containing `gridgpu/` and `README.md`. The public clone is named `gridrudder`;
+the source archive extracts to `gridrudder-public-preview`.
+
+This preview runs directly from source. It does not require `pip install`,
+root access, a GPU, or a rental for simulation.
 
 ## 1. Run the simulator
 
@@ -17,7 +22,10 @@ python3 -m gridgpu demo --output artifacts/demo-local.jsonl
 python3 -m gridgpu benchmark
 ```
 
-The demo creates local JSONL audit evidence. Inspect it before continuing; do not commit a run artifact until it has passed the sanitation checklist.
+The demo creates a local JSONL simulation trace. This trace is not the
+hash-chained audit format consumed by `verify-audit`. Inspect it before
+continuing; do not commit a run artifact until it has passed the sanitation
+checklist.
 
 ## 2. Run the tests
 
@@ -25,11 +33,15 @@ The demo creates local JSONL audit evidence. Inspect it before continuing; do no
 python3 -m unittest discover -s tests -v
 ```
 
-## 3. Verify an audit artifact
+## 3. Generate and verify a synthetic audit artifact
 
 ```bash
-python3 -m gridgpu verify-audit artifacts/demo-local.jsonl
+python3 -m gridgpu gate-b-release --output artifacts/gate-b-local
+python3 -m gridgpu verify-audit artifacts/gate-b-local/release-audit.jsonl
 ```
+
+The output directory must be new; choose a different name for each run.
+Gate B checks simulated scenarios and does not establish hardware readiness.
 
 ## 4. Optional read-only NVIDIA probe
 
@@ -39,7 +51,9 @@ On a machine with NVIDIA tooling installed:
 python3 -m gridgpu probe-nvidia
 ```
 
-The probe is intended to be read-only and reports whether a power limit appears writable; it does not change that limit. Review its output for host identifiers before sharing it.
+The probe is strictly read-only and always reports `power_limit_writable=false`;
+it does not test or change power limits. Review its output for host identifiers
+before sharing it.
 
 ## Attended performance boundary: separate path
 

@@ -37,6 +37,27 @@ queries are:
 power, limit visibility, and related telemetry without a mutation flag. Pin and
 record its executable provenance. Configure a fresh source epoch for this run.
 
+Prepare an absolute-path JSON configuration that validates against
+`docs/read-only-qualification.schema.json`. It contains identities, executable
+paths, sampling/alignment policy, and an approved overhead calibration only; it
+must contain no hostname for remote access, SSH setting, password, token, or BMC
+network credential.
+
+From a local shell on the qualified rented host, and only after Gate 0 inputs
+have been reviewed, run:
+
+```bash
+python3 -m gridgpu.qualification_cli \
+  --config /absolute/reviewed/qualification-config.json \
+  --output /absolute/new/evidence/qualification-packet.json
+```
+
+The output path must not already exist. The serializer creates it mode `0600`,
+fsyncs canonical JSON, and includes a SHA-256 digest over the complete packet.
+Exit code 0 means the configured alignment checks accepted the evidence; exit
+code 2 means a packet was retained but qualification was not accepted. Any
+exception is a failed collection, never permission to proceed.
+
 ## Attended collection
 
 1. Start with three samples at an architect-approved interval; do not run a GPU
