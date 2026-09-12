@@ -127,7 +127,11 @@ class NvidiaSingleGpuPowerControl:
                 raise PowerAdapterError("GPU state changed before cap")
             self._attempted = True  # A timeout/nonzero response may still have mutated hardware.
         elif not self._attempted:
-            raise PowerAdapterError("restoration is only allowed after a cap attempt")
+            # The trial requests restoration even when our pre-cap screening
+            # rejected the write. Prove unchanged state without issuing a write.
+            if self.observe_limit(gpu_uuid) != self._original:
+                raise PowerAdapterError("unattempted cap has unexpected state; restoration is unproven")
+            return
         # Restoration remains available after a failed cap or unhealthy telemetry.
         self._run(("-i", self.gpu_uuid, "-pl", f"{watts:.3f}"))
         if abs(self.observe_limit(gpu_uuid) - watts) > 0.5:

@@ -4,6 +4,7 @@ Collectors must synchronize GPU completion before recording job completion.
 No hardware, clock, or workload measurements are synthesized by this module.
 """
 from dataclasses import dataclass
+from datetime import datetime
 import math
 from typing import Callable
 
@@ -83,7 +84,6 @@ def measure_window(window: WorkloadWindow, *, phase: str, repetition: int,
     raw = WorkSample(len(latencies), window.duration_seconds, window.meter_samples)
     measured = _measure(phase, repetition, raw, expected_duration, meter_source_id, chassis_id)
     timestamps = window.meter_samples
-    from datetime import datetime
     origin = datetime.fromisoformat(timestamps[0].timestamp_utc.replace("Z", "+00:00"))
     for sample in timestamps:
         timestamp = datetime.fromisoformat(sample.timestamp_utc.replace("Z", "+00:00"))
@@ -113,6 +113,7 @@ class BenchmarkRunner:
         self.meter_source_id = meter_source_id
         self.chassis_id = chassis_id
         self.measurements: list[BenchmarkMeasurement] = []
+        self._last_window_end = None
 
     def __call__(self, phase: str, repetition: int, duration: float) -> WorkSample:
         warmup = phase.endswith("_warmup")
@@ -124,11 +125,21 @@ class BenchmarkRunner:
         measured = measure_window(self.collector(phase, repetition, duration), phase=base_phase,
             repetition=0 if warmup else repetition, expected_sha256=self.workload_sha256,
             expected_duration=duration, meter_source_id=self.meter_source_id, chassis_id=self.chassis_id)
+        start, end = _window_bounds(measured)
+        if self._last_window_end is not None and start < self._last_window_end:
+            raise ValueError("meter windows overlap, replay, or regress in time")
+        self._last_window_end = end
         if not warmup:
             self.measurements.append(measured)
         if measured.failed_jobs:
             raise ValueError("workload errors invalidate the performance trial")
         return measured.work_sample
+
+
+def _window_bounds(measurement: BenchmarkMeasurement) -> tuple[datetime, datetime]:
+    samples = measurement.work_sample.meter_samples
+    return tuple(datetime.fromisoformat(sample.timestamp_utc.replace("Z", "+00:00"))
+                 for sample in (samples[0], samples[-1]))
 
 
 def validate_comparison(measurements: tuple[BenchmarkMeasurement, ...], repetitions: int) -> None:
@@ -140,3 +151,10 @@ def validate_comparison(measurements: tuple[BenchmarkMeasurement, ...], repetiti
         raise ValueError("comparison requires each baseline/capped/restored repetition exactly once")
     if len({m.workload_sha256 for m in measurements}) != 1 or any(m.failed_jobs for m in measurements):
         raise ValueError("comparison mixes workloads or contains errors")
+    ordered = sorted(measurements, key=lambda m: (("baseline", "capped", "restored").index(m.phase), m.repetition))
+    previous_end = None
+    for measured in ordered:
+        start, end = _window_bounds(measured)
+        if previous_end is not None and start < previous_end:
+            raise ValueError("comparison meter windows overlap, replay, or regress in time")
+        previous_end = end

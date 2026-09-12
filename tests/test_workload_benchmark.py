@@ -1,4 +1,5 @@
 from dataclasses import replace
+from datetime import datetime, timedelta
 import unittest
 
 from gridgpu.performance_trial import MeterSample, PerformanceTrialError
@@ -85,8 +86,15 @@ class WorkloadBenchmarkTests(unittest.TestCase):
             self.measure(replace(self.window(), meter_samples=samples))
 
     def runner(self, collector=None):
-        return BenchmarkRunner(collector or (lambda *_: self.window()), workload_sha256="a" * 64,
+        counter = iter(range(100))
+        return BenchmarkRunner(collector or (lambda *_: self.shifted_window(next(counter) * 20)), workload_sha256="a" * 64,
                                meter_source_id="meter", chassis_id="host")
+
+    def shifted_window(self, offset):
+        window = self.window()
+        return replace(window, meter_samples=tuple(replace(m, timestamp_utc=(
+            datetime.fromisoformat(m.timestamp_utc) + timedelta(seconds=offset)).isoformat())
+            for m in window.meter_samples))
 
     def test_runner_collects_only_measured_phases(self):
         runner = self.runner()
@@ -117,13 +125,42 @@ class WorkloadBenchmarkTests(unittest.TestCase):
             runner("baseline", 0, 10)
 
     def test_incomplete_comparison_and_workload_changes_rejected(self):
-        measurements = tuple(self.measure(phase=p, repetition=i)
-                             for p in ("baseline", "capped", "restored") for i in range(2))
+        measurements = tuple(self.measure(self.shifted_window((pindex * 2 + i) * 20), phase=p, repetition=i)
+                             for pindex, p in enumerate(("baseline", "capped", "restored")) for i in range(2))
         for invalid in (measurements[:-1], measurements[:-1] + (measurements[0],),
                         measurements[:-1] + (replace(measurements[-1], workload_sha256="b" * 64),),
                         measurements[:-1] + (replace(measurements[-1], failed_jobs=1),)):
             with self.assertRaises(ValueError):
                 validate_comparison(invalid, 2)
+
+    def test_runner_rejects_replayed_overlapping_and_regressed_windows(self):
+        for offset in (0, 5, -20):
+            windows = iter((self.window(), self.shifted_window(offset)))
+            runner = self.runner(lambda *_: next(windows))
+            runner("baseline", 0, 10)
+            with self.subTest(offset=offset), self.assertRaisesRegex(ValueError, "overlap"):
+                runner("capped", 0, 10)
+
+    def test_warmup_windows_cannot_be_reused(self):
+        runner = self.runner(lambda *_: self.window())
+        runner("baseline_warmup", -1, 10)
+        with self.assertRaisesRegex(ValueError, "overlap"):
+            runner("baseline", 0, 10)
+
+    def test_contiguous_windows_accepted(self):
+        windows = iter((self.window(), self.shifted_window(10)))
+        runner = self.runner(lambda *_: next(windows))
+        runner("baseline", 0, 10)
+        runner("baseline", 1, 10)
+        self.assertEqual(len(runner.measurements), 2)
+
+    def test_comparison_rejects_replayed_or_out_of_phase_windows(self):
+        phases = [(p, i) for p in ("baseline", "capped", "restored") for i in range(2)]
+        for offsets in ((0,) * 6, (0, 20, 40, 60, 80, 85), (20, 0, 40, 60, 80, 100)):
+            measurements = tuple(self.measure(self.shifted_window(t), phase=p, repetition=i)
+                                 for (p, i), t in zip(phases, offsets))
+            with self.assertRaisesRegex(ValueError, "overlap"):
+                validate_comparison(measurements, 2)
 
 
 if __name__ == "__main__":

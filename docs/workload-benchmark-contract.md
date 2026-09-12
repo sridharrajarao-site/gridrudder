@@ -16,6 +16,11 @@ start/end offsets and explicit output-validation success. Synchronize GPU work
 before recording completion; launch time is not completion time. Drain outstanding
 jobs within the measured window. If jobs extend past it, reject the window and
 repeat with a collector that stops admission early enough. Do not omit failed jobs.
+The collector must account for every submitted job, including failed, cancelled,
+and timed-out work. Drain and synchronize all submitted GPU work before ending
+the window; cancellation is not evidence of GPU completion. Outstanding jobs
+invalidate the window. This contract cannot detect records a collector omits,
+so admission/drain accounting must be tested in the real collector.
 
 Meter samples must come from the authorized whole-server meter/chassis and span
 the actual window at three or more increasing times. UTC and elapsed offsets
@@ -38,3 +43,9 @@ audit result: the existing WorkSample interface retains work and energy but does
 not itself serialize latency and error details. Interpret per-window results and
 restoration drift before making claims. Hardware collection, metering precision,
 representative workloads and real-world repeatability still need validation.
+
+Windows must progress chronologically without overlap, including warmup in the
+runner. Comparison validation checks chronological baseline, capped, then restored
+repetitions. Reusing an earlier timestamped meter window is rejected; adjacent
+windows may share their boundary timestamp. This detects timestamp replay, not
+fabricated fresh timestamps, which still require trusted collection provenance.
