@@ -28,5 +28,9 @@ h2{font-size:clamp(28px,3vw,36px);line-height:1.15}
 .columns h3{font-size:18px;line-height:1.35}
 .record dl>div{grid-template-columns:minmax(0,1fr) auto}
 .record dd{overflow-wrap:anywhere}
+/* Selected Steered Grid identity: mixed-case, compact and neutral. */
+.brand{font:650 24px/1.1 var(--font-geist-sans),Arial,sans-serif;letter-spacing:-.045em;gap:10px;white-space:nowrap;color:#303238}
+.brand-mark{display:block;width:56px;height:28px;object-fit:contain;mix-blend-mode:multiply;flex:none}
+@media(max-width:480px){.brand{font-size:21px;gap:8px}.brand-mark{width:48px;height:24px}}
 @media(max-width:1100px){.columns{grid-template-columns:1fr}.columns article+article{border-left:0;border-top:1px solid var(--line)}}
 @media(max-width:480px){.record dl>div{grid-template-columns:1fr}.record dd{margin-top:4px}.record small{grid-column:1}.control li{padding-inline:0}.hero .button{font-size:13px;padding-inline:16px}}
