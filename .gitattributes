@@ -1,0 +1,16 @@
+# Keep local/private/generated material out of source archives made with git archive.
+/artifacts/physical-*.jsonl export-ignore
+/artifacts/private/ export-ignore
+/dist/ export-ignore
+/site/.git/ export-ignore
+/site/node_modules/ export-ignore
+/site/.next/ export-ignore
+/site/.vinext/ export-ignore
+/site/.wrangler/ export-ignore
+/site/dist/ export-ignore
+/site/.openai/ export-ignore
+
+# Normalize public text artifacts.
+* text=auto eol=lf
+*.json text eol=lf
+*.md text eol=lf

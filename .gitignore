@@ -1,0 +1,38 @@
+# Private or identifying evidence: preserve locally, never publish by default.
+/artifacts/physical-*.jsonl
+/artifacts/private/
+
+# Locally generated release packages.
+/dist/
+
+# Python state.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# JavaScript and site build/deployment state.
+node_modules/
+.next/
+.vinext/
+.wrangler/
+/site/dist/
+/site/.openai/
+
+# Local configuration and credentials.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Editor and operating-system state.
+.DS_Store
+.idea/
+.vscode/
+*~
