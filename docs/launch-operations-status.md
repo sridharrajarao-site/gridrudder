@@ -20,8 +20,9 @@
 
 ## Needs completion
 
-- Verify and configure the owner's site-specific operator ID, then validate
-  live authorized and unauthorized access. Never publish that identity in source.
+- Owner identity is configured outside source. Live owner sign-in reaches the
+  operations page; anonymous API access returns 403 with private/no-store.
+  Validate authorized record rendering after the final UI publication.
 - Scheduled deletion is not configured. The operator cleanup action and
   opportunistic insert cleanup do not guarantee retention during quiet periods.
 - Validate notifications on a real scheduled run; keep the local app available.
