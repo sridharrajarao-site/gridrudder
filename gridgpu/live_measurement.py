@@ -46,7 +46,7 @@ class LiveReadOnlyCollector:
                  runner: Callable, utc_clock: Callable, monotonic_clock: Callable,
                  sleeper: Callable, start_workload: Callable, finish_workload: Callable,
                  sample_interval_seconds: float = 1.0, maximum_acquisition_seconds: float = 0.25,
-                 required_owner_uid: int = 0):
+                 required_owner_uid: int = 0, evidence_sink: Callable = None):
         for value in (sample_interval_seconds, maximum_acquisition_seconds):
             if not math.isfinite(value) or value <= 0:
                 raise ValueError("sample interval and acquisition budget must be positive")
@@ -61,6 +61,7 @@ class LiveReadOnlyCollector:
         self._failed = False
         self.gpu_uuid, self.workload_sha256 = gpu_uuid, workload_sha256
         self.evidence = []
+        self._evidence_sink = evidence_sink
         self._bmc = BmcPowerObserver(host_id=host_id, expected_chassis_id=chassis_id,
             meter_id=meter_id, physical_boundary=physical_boundary, source_epoch=source_epoch,
             executable=bmc_executable, runner=self._run, clock=utc_clock,
@@ -113,6 +114,8 @@ class LiveReadOnlyCollector:
         elapsed = began - origin
         self.evidence.append(ReadOnlySampleEvidence(reading.timestamp_utc, elapsed, gpu_watts,
             self.gpu_uuid, driver, raw, self._nvidia.sha256, bmc, latency))
+        if self._evidence_sink is not None:
+            self._evidence_sink(self.evidence[-1])
         return MeterSample(elapsed, reading.value, reading.timestamp_utc.isoformat(),
             reading.source_id, bmc.chassis_id)
 
