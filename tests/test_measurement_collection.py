@@ -73,7 +73,7 @@ class MeasurementCollectionTests(unittest.TestCase):
         self.fault = "timeout"
         with self.assertRaisesRegex(CollectionError, "deadline"):
             self.runner("baseline", 0, 10)
-        with self.assertRaisesRegex(CollectionError, "unavailable"):
+        with self.assertRaisesRegex(ValueError, "unavailable"):
             self.runner("baseline", 0, 10)
         self.assertEqual(self.calls, 1)
 
@@ -81,7 +81,7 @@ class MeasurementCollectionTests(unittest.TestCase):
         self.fault = "raises_timeout"
         with self.assertRaises(TimeoutError):
             self.runner("baseline", 0, 10)
-        with self.assertRaisesRegex(CollectionError, "unavailable"):
+        with self.assertRaisesRegex(ValueError, "unavailable"):
             self.runner("baseline", 0, 10)
 
     def test_failed_complete_job_accounting_reaches_runner(self):
@@ -89,7 +89,7 @@ class MeasurementCollectionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "errors invalidate"):
             self.runner("capped", 0, 10)
         self.assertEqual(self.runner.measurements[0].failed_jobs, 1)
-        with self.assertRaisesRegex(CollectionError, "unavailable"):
+        with self.assertRaisesRegex(ValueError, "unavailable"):
             self.runner("restored", 0, 10)
 
     def test_failure_blocks_different_phase_and_repetition_without_collection(self):
@@ -127,3 +127,12 @@ class MeasurementCollectionTests(unittest.TestCase):
             utc_clock=lambda: self.origin, monotonic_clock=lambda: next(times))
         with self.assertRaisesRegex(CollectionError, "clocks"):
             wrapper("baseline", 0, 10)
+
+    def test_downstream_hash_rejection_poisoning(self):
+        self.runner.workload_sha256 = "b" * 64
+        with self.assertRaisesRegex(ValueError, "SHA-256 mismatch"):
+            self.runner("baseline", 0, 10)
+        self.runner.workload_sha256 = "a" * 64
+        with self.assertRaisesRegex(ValueError, "unavailable"):
+            self.runner("capped", 0, 10)
+        self.assertEqual(self.calls, 1)

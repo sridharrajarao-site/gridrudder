@@ -114,8 +114,17 @@ class BenchmarkRunner:
         self.chassis_id = chassis_id
         self.measurements: list[BenchmarkMeasurement] = []
         self._last_window_end = None
+        self._unavailable = False
 
     def __call__(self, phase: str, repetition: int, duration: float) -> WorkSample:
+        if self._unavailable:
+            raise ValueError("benchmark runner unavailable after failure; stop and drain work before creating a new runner")
+        self._unavailable = True
+        result = self._run_once(phase, repetition, duration)
+        self._unavailable = False
+        return result
+
+    def _run_once(self, phase: str, repetition: int, duration: float) -> WorkSample:
         warmup = phase.endswith("_warmup")
         base_phase = phase[:-7] if warmup else phase
         if warmup and repetition != -1:
